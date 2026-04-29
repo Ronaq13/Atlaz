@@ -4,15 +4,17 @@
 
 require "csv"
 
-destinations_seed_path = Rails.root.join("db", "seeds", "destinations_seed.csv")
-
-puts "Seeding destinations..."
-
-rows = CSV.read(destinations_seed_path, headers: true)
-
 def clean_id(val)
   val.presence&.gsub(",", "")&.to_i
 end
+
+# ---------------------------------------------------------------------------
+# Destinations
+# ---------------------------------------------------------------------------
+puts "Seeding destinations..."
+
+destinations_csv = Rails.root.join("db", "seeds", "destinations_seed.csv")
+rows = CSV.read(destinations_csv, headers: true)
 
 # Maps original CSV id → newly created Destination record so that
 # state_id / country_id (self-referential on the same table via STI)
@@ -46,3 +48,19 @@ id_map = {}
 end
 
 puts "Done! #{Destination.count} destinations seeded."
+
+# ---------------------------------------------------------------------------
+# Currencies
+# ---------------------------------------------------------------------------
+puts "Seeding currencies..."
+
+currencies_csv = Rails.root.join("db", "seeds", "currencies_seed.csv")
+
+CSV.foreach(currencies_csv, headers: true) do |row|
+  Currency.find_or_create_by!(code: row["code"]) do |c|
+    c.symbol = row["symbol"]
+    c.name   = row["name"]
+  end
+end
+
+puts "Done! #{Currency.count} currencies seeded."
