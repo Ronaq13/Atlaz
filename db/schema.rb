@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_29_111713) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_05_132811) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -33,12 +33,34 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_29_111713) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "hotel_details", force: :cascade do |t|
+  create_table "hotels", force: :cascade do |t|
+    t.string "address"
     t.jsonb "amenities"
     t.integer "class_rating"
     t.datetime "created_at", null: false
     t.integer "customer_rating"
+    t.text "description"
+    t.bigint "destination_id", null: false
+    t.string "hero_image_url"
+    t.datetime "last_availability_synced_at"
+    t.datetime "last_pricing_synced_at"
+    t.decimal "lat"
+    t.decimal "long"
+    t.jsonb "min_price"
+    t.string "name"
+    t.string "slug"
+    t.string "state"
+    t.bigint "supplier_id"
+    t.string "supplier_product_id"
+    t.boolean "sync_availability", default: false
+    t.boolean "sync_pricing", default: false
+    t.string "type", default: "Hotel", null: false
     t.datetime "updated_at", null: false
+    t.index ["destination_id"], name: "index_hotels_on_destination_id"
+    t.index ["slug"], name: "index_hotels_on_slug", unique: true
+    t.index ["supplier_id", "supplier_product_id"], name: "index_hotels_on_supplier_id_and_supplier_product_id_unique", unique: true, where: "((supplier_id IS NOT NULL) AND (supplier_product_id IS NOT NULL))"
+    t.index ["supplier_id"], name: "index_hotels_on_supplier_id"
+    t.index ["supplier_product_id"], name: "index_hotels_on_supplier_product_id"
   end
 
   create_table "images", force: :cascade do |t|
@@ -53,28 +75,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_29_111713) do
     t.index ["imageable_type", "imageable_id"], name: "index_images_on_imageable"
   end
 
-  create_table "products", force: :cascade do |t|
-    t.string "address"
-    t.bigint "city_id"
+  create_table "static_sync_configs", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.bigint "currency_id"
-    t.text "description"
-    t.bigint "detail_id"
-    t.string "detail_type"
-    t.datetime "last_availability_synced_at"
-    t.datetime "last_pricing_synced_at"
-    t.decimal "lat"
-    t.decimal "lng"
-    t.decimal "min_price"
-    t.string "name"
-    t.jsonb "ratings"
-    t.string "slug"
-    t.string "state"
-    t.bigint "state_id"
-    t.boolean "sync_availability", default: false
-    t.boolean "sync_pricing", default: false
+    t.bigint "destination_id", null: false
+    t.integer "from_page", default: 1
+    t.string "job_name"
+    t.integer "page_size", default: 20
+    t.string "supplier_destination_id"
+    t.integer "to_page", default: 10
     t.datetime "updated_at", null: false
-    t.index ["city_id"], name: "index_products_on_city_id"
-    t.index ["slug"], name: "index_products_on_slug", unique: true
+    t.index ["destination_id"], name: "index_static_sync_configs_on_destination_id"
   end
+
+  create_table "suppliers", force: :cascade do |t|
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.string "state", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_suppliers_on_code", unique: true
+  end
+
+  add_foreign_key "hotels", "destinations"
+  add_foreign_key "hotels", "suppliers"
+  add_foreign_key "static_sync_configs", "destinations"
 end
