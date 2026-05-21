@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_05_132811) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_21_192049) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -33,6 +33,29 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_05_132811) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "hotel_rates", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "currency_id", null: false
+    t.bigint "hotel_id", null: false
+    t.decimal "starting_amount", precision: 12, scale: 2, null: false
+    t.datetime "synced_at", null: false
+    t.date "till_date", null: false
+    t.datetime "updated_at", null: false
+    t.index ["currency_id"], name: "index_hotel_rates_on_currency_id"
+    t.index ["hotel_id", "till_date"], name: "index_hotel_rates_on_hotel_id_and_till_date_unique", unique: true
+    t.index ["hotel_id"], name: "index_hotel_rates_on_hotel_id"
+  end
+
+  create_table "hotel_static_sync_configs", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "destination_id", null: false
+    t.string "job_name"
+    t.integer "page_size", default: 20
+    t.string "supplier_destination_id"
+    t.datetime "updated_at", null: false
+    t.index ["destination_id"], name: "index_hotel_static_sync_configs_on_destination_id"
+  end
+
   create_table "hotels", force: :cascade do |t|
     t.string "address"
     t.jsonb "amenities"
@@ -42,25 +65,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_05_132811) do
     t.text "description"
     t.bigint "destination_id", null: false
     t.string "hero_image_url"
-    t.datetime "last_availability_synced_at"
-    t.datetime "last_pricing_synced_at"
     t.decimal "lat"
     t.decimal "long"
     t.jsonb "min_price"
     t.string "name"
     t.string "slug"
     t.string "state"
+    t.string "supplier_hotel_id"
     t.bigint "supplier_id"
-    t.string "supplier_product_id"
-    t.boolean "sync_availability", default: false
-    t.boolean "sync_pricing", default: false
+    t.boolean "sync_rate", default: false, null: false
     t.string "type", default: "Hotel", null: false
     t.datetime "updated_at", null: false
     t.index ["destination_id"], name: "index_hotels_on_destination_id"
     t.index ["slug"], name: "index_hotels_on_slug", unique: true
-    t.index ["supplier_id", "supplier_product_id"], name: "index_hotels_on_supplier_id_and_supplier_product_id_unique", unique: true, where: "((supplier_id IS NOT NULL) AND (supplier_product_id IS NOT NULL))"
+    t.index ["supplier_hotel_id"], name: "index_hotels_on_supplier_hotel_id"
+    t.index ["supplier_id", "supplier_hotel_id"], name: "index_hotels_on_supplier_id_and_supplier_hotel_id_unique", unique: true, where: "((supplier_id IS NOT NULL) AND (supplier_hotel_id IS NOT NULL))"
     t.index ["supplier_id"], name: "index_hotels_on_supplier_id"
-    t.index ["supplier_product_id"], name: "index_hotels_on_supplier_product_id"
   end
 
   create_table "images", force: :cascade do |t|
@@ -75,18 +95,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_05_132811) do
     t.index ["imageable_type", "imageable_id"], name: "index_images_on_imageable"
   end
 
-  create_table "static_sync_configs", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.bigint "destination_id", null: false
-    t.integer "from_page", default: 1
-    t.string "job_name"
-    t.integer "page_size", default: 20
-    t.string "supplier_destination_id"
-    t.integer "to_page", default: 10
-    t.datetime "updated_at", null: false
-    t.index ["destination_id"], name: "index_static_sync_configs_on_destination_id"
-  end
-
   create_table "suppliers", force: :cascade do |t|
     t.string "code", null: false
     t.datetime "created_at", null: false
@@ -96,7 +104,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_05_132811) do
     t.index ["code"], name: "index_suppliers_on_code", unique: true
   end
 
+  add_foreign_key "hotel_rates", "currencies"
+  add_foreign_key "hotel_rates", "hotels"
+  add_foreign_key "hotel_static_sync_configs", "destinations"
   add_foreign_key "hotels", "destinations"
   add_foreign_key "hotels", "suppliers"
-  add_foreign_key "static_sync_configs", "destinations"
 end

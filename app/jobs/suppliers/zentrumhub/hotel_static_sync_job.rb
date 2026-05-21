@@ -1,8 +1,8 @@
 class Suppliers::Zentrumhub::HotelStaticSyncJob < ApplicationJob
   queue_as :low
 
-  BATCH_SIZE = 500
-  UPSERT_UNIQUE_INDEX = "index_hotels_on_supplier_id_and_supplier_product_id_unique"
+  BATCH_SIZE = 1000
+  UPSERT_UNIQUE_INDEX = "index_hotels_on_supplier_id_and_supplier_hotel_id_unique"
 
   UPSERT_UPDATE_FIELDS = %w[
     address description lat long name class_rating amenities customer_rating hero_image_url destination_id type updated_at
@@ -10,17 +10,17 @@ class Suppliers::Zentrumhub::HotelStaticSyncJob < ApplicationJob
 
   # Columns written by upsert_all (string keys), excluding timestamps handled separately.
   UPSERT_ATTRIBUTE_NAMES = %w[
-    address description lat long name supplier_id supplier_product_id slug type destination_id state
+    address description lat long name supplier_id supplier_hotel_id slug type destination_id state
     class_rating customer_rating amenities hero_image_url
   ].freeze
 
   def perform(args)
-    @config = StaticSyncConfig.find(args[:static_sync_config_id])
+    @config = HotelStaticSyncConfig.find(args[:static_sync_config_id])
 
     geo_boundaries = Suppliers::Zentrumhub::Location::GeoLocation.call(location_id: @config.supplier_destination_id)[:polygonal_lat_lng_boundaries].flatten
     hotel_payloads = Suppliers::Zentrumhub::Hotels::HotelContent.call(polygonalRegionCoordinates: geo_boundaries)[:normalized_hotels_attributes]
 
-    hotel_payloads = hotel_payloads.first(10)
+    hotel_payloads = hotel_payloads
 
     hotel_payloads.each_slice(BATCH_SIZE) do |batch|
       upsert_hotel_batch!(batch)
@@ -36,10 +36,10 @@ class Suppliers::Zentrumhub::HotelStaticSyncJob < ApplicationJob
   def upsert_hotel_batch!(batch)
     now = Time.current
     supplier_id = Supplier.zentrumhub.id
-    supplier_product_ids = batch.map { |p| (p[:supplier_product_id] || p["supplier_product_id"]).to_s }
-    existing_by_key = Hotel.where(supplier_id: supplier_id, supplier_product_id: supplier_product_ids)
+    supplier_hotel_ids = batch.map { |p| (p[:supplier_hotel_id] || p["supplier_hotel_id"]).to_s }
+    existing_by_key = Hotel.where(supplier_id: supplier_id, supplier_hotel_id: supplier_hotel_ids)
       .includes(:destination)
-      .index_by { |p| p.supplier_product_id.to_s }
+      .index_by { |p| p.supplier_hotel_id.to_s }
 
     rows = batch.filter_map do |normalized_attrs|
       hotel = build_hotel_for_validation(normalized_attrs, existing_by_key: existing_by_key, destination: destination)
@@ -59,7 +59,7 @@ class Suppliers::Zentrumhub::HotelStaticSyncJob < ApplicationJob
 
   def build_hotel_for_validation(normalized_attrs, existing_by_key:, destination:)
     attrs = normalized_attrs.deep_stringify_keys
-    key = attrs["supplier_product_id"].to_s
+    key = attrs["supplier_hotel_id"].to_s
     record = existing_by_key[key] || ZentrumhubHotel.new
 
     assignable = attrs.slice(*assignable_from_normalized_keys(attrs))

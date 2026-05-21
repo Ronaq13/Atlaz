@@ -18,4 +18,8 @@ class Supplier < ApplicationRecord
   def self.zentrumhub
     @zentrumhub ||= active.find_by(name: "ZentrumHub")
   end
+
+  def rate_sync_job
+    "Suppliers::#{name.gsub(' ', '').downcase.camelize}::HotelRateSyncJob".constantize
+  end
 end

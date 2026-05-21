@@ -11,7 +11,7 @@ class Normalizers::BaseHotelNormalizer
       lat: lat,
       long: long,
       supplier_id: supplier_id,
-      supplier_product_id: supplier_product_id,
+      supplier_hotel_id: supplier_hotel_id,
       class_rating: class_rating,
       customer_rating: customer_rating,
       hero_image_url: hero_image_url,
@@ -24,7 +24,7 @@ class Normalizers::BaseHotelNormalizer
     raise NotImplementedError
   end
 
-  def supplier_product_id
+  def supplier_hotel_id
     raise NotImplementedError
   end
 

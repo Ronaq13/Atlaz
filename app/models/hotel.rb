@@ -10,6 +10,7 @@ class Hotel < ApplicationRecord
   belongs_to :destination
   belongs_to :supplier, optional: true
 
+  has_many :rates, class_name: "HotelRate", dependent: :destroy
   has_many :images, as: :imageable, dependent: :destroy
 
   accepts_nested_attributes_for :images, allow_destroy: true

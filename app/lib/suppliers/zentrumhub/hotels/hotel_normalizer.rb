@@ -32,7 +32,7 @@ class Suppliers::Zentrumhub::Hotels::HotelNormalizer < ::Normalizers::BaseHotelN
     @supplier.id
   end
 
-  def supplier_product_id
+  def supplier_hotel_id
     @raw_hotel_payload[:id]
   end
 
