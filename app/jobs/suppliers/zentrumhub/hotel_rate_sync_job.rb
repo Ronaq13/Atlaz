@@ -1,7 +1,7 @@
 class Suppliers::Zentrumhub::HotelRateSyncJob < ApplicationJob
   queue_as :low
 
-  # Three lookahead windows: cheapest 1-night rate at each horizon.
+  # Four lookahead windows: cheapest 1-night rate at each horizon.
   RATE_WINDOWS = [
     { months: 1 },
     { months: 3 },
