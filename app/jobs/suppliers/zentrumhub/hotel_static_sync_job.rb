@@ -17,8 +17,8 @@ class Suppliers::Zentrumhub::HotelStaticSyncJob < ApplicationJob
   def perform(args)
     @config = HotelStaticSyncConfig.find(args[:static_sync_config_id])
 
-    geo_boundaries = Suppliers::Zentrumhub::Location::GeoLocation.call(location_id: @config.supplier_destination_id)[:polygonal_lat_lng_boundaries].flatten
-    hotel_payloads = Suppliers::Zentrumhub::Hotels::HotelContent.call(polygonalRegionCoordinates: geo_boundaries)[:normalized_hotels_attributes]
+    geo_result     = Suppliers::Zentrumhub::Location::GeoLocation.call(location_id: @config.supplier_destination_id)
+    hotel_payloads = Suppliers::Zentrumhub::Hotels::HotelContent.call(**geo_result)[:normalized_hotels_attributes]
 
     hotel_payloads = hotel_payloads
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_21_192049) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_22_120437) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -50,7 +50,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_21_192049) do
     t.datetime "created_at", null: false
     t.bigint "destination_id", null: false
     t.string "job_name"
-    t.integer "page_size", default: 20
     t.string "supplier_destination_id"
     t.datetime "updated_at", null: false
     t.index ["destination_id"], name: "index_hotel_static_sync_configs_on_destination_id"
