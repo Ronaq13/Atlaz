@@ -40,8 +40,8 @@ Rails.application.configure do
   # Report deprecations to help catch issues before they hit production.
   config.active_support.report_deprecations = true
 
-  # Use Redis-backed cache store (shares the host Redis instance).
-  config.cache_store = :redis_cache_store, { url: ENV.fetch("REDIS_URL") }
+  # Use Redis-backed cache store.
+  config.cache_store = :redis_cache_store, { url: ENV.fetch("REDIS_URL", "redis://redis:6379/0") }
 
   # Use Sidekiq for background jobs.
   config.active_job.queue_adapter = :sidekiq

@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: atlaz-typesense
-  namespace: staging-1
 spec:
   serviceName: atlaz-typesense
   replicas: 1
@@ -44,7 +43,7 @@ spec:
         name: typesense-data
       spec:
         accessModes: ["ReadWriteOnce"]
-        storageClassName: local-path   # k3s default; change for other distros
+        storageClassName: local-path
         resources:
           requests:
-            storage: 20Gi
+            storage: 10Gi

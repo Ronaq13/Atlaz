@@ -1,0 +1,6 @@
+resources:
+  - redis.yaml
+  - services.yaml
+  - typesense-statefulset.yaml
+  - rails-deployment.yaml
+  - sidekiq-deployment.yaml

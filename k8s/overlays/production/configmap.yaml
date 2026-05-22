@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: atlaz-config
+data:
+  RAILS_ENV: "production"
+  RAILS_LOG_LEVEL: "info"
+  RAILS_MAX_THREADS: "5"
+  REDIS_URL: "redis://redis:6379/0"
+  TYPESENSE_HOST: "atlaz-typesense"
+  TYPESENSE_PORT: "8108"
+  TYPESENSE_PROTOCOL: "http"
