@@ -10,6 +10,7 @@ RUN apt-get update -qq && \
       git \
       libpq-dev \
       libvips \
+      libyaml-dev \
       pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
@@ -17,7 +18,8 @@ WORKDIR /rails
 
 # Install gems
 COPY Gemfile Gemfile.lock ./
-RUN bundle install --without development test && \
+RUN bundle config set --local without "development test" && \
+    bundle install && \
     bundle exec bootsnap precompile --gemfile
 
 # Copy application code

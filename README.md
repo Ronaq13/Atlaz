@@ -1,24 +1,31 @@
-# README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## Build docker image locally
 
-Things you may want to cover:
+```
+docker build -t atlaz:local .
+```
 
-* Ruby version
+## Running image locally
 
-* System dependencies
+Note the env will be staging1 as development and test gems are not installed in image. But you can pass database, redis and typesense local urls. 
 
-* Configuration
+```
+docker run --rm -it \
+  -p 3013:3013 \
+  -e RAILS_ENV=staging1 \
+  -e DATABASE_URL="postgresql://raounak@host.docker.internal:5432/atlaz_development" \
+  -e REDIS_URL="redis://host.docker.internal:6379/0" \
+  -e TYPESENSE_HOST="host.docker.internal" \
+  -e TYPESENSE_PORT="8108" \
+  -e TYPESENSE_PROTOCOL="http" \
+  -e RAILS_MASTER_KEY=$(cat config/credentials/staging1.key) \
+  atlaz:local
+```
 
-* Database creation
+## Run typesense locally
 
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+```
+docker run -p 8108:8108 -v /tmp/typesense-data:/data \
+  typesense/typesense:27.0 \
+  --data-dir /data --api-key=xyz --enable-cors
+```

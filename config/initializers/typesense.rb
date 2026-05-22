@@ -1,12 +1,12 @@
 TYPESENSE_CLIENT = Typesense::Client.new(
   nodes: [
     {
-      host:     Rails.application.credentials.dig(:typesense, :host) || "localhost",
-      port:     Rails.application.credentials.dig(:typesense, :port) || 8108,
-      protocol: Rails.application.credentials.dig(:typesense, :protocol) || "http"
+      host:     ENV.fetch("TYPESENSE_HOST",     "localhost"),
+      port:     ENV.fetch("TYPESENSE_PORT",     8108).to_i,
+      protocol: ENV.fetch("TYPESENSE_PROTOCOL", "http")
     }
   ],
-  api_key:             Rails.application.credentials.dig(:typesense, :api_key) || "xyz",
+  api_key:                    ENV.fetch("TYPESENSE_API_KEY", "xyz"),
   connection_timeout_seconds: 5
 )
 
