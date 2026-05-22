@@ -40,15 +40,14 @@ Rails.application.configure do
   # Report deprecations to help catch issues before they hit production.
   config.active_support.report_deprecations = true
 
-  # Replace the default in-process memory cache store with a durable alternative.
-  config.cache_store = :solid_cache_store
+  # Use Redis-backed cache store (shares the host Redis instance).
+  config.cache_store = :redis_cache_store, { url: ENV.fetch("REDIS_URL") }
 
-  # Replace the default in-process and non-durable queuing backend for Active Job.
-  config.active_job.queue_adapter = :solid_queue
-  config.solid_queue.connects_to = { database: { writing: :queue } }
+  # Use Sidekiq for background jobs.
+  config.active_job.queue_adapter = :sidekiq
 
   # Set host to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: "staging.example.com" }
+  config.action_mailer.default_url_options = { host: "staging1.atlaz.thrillo.dev" }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).

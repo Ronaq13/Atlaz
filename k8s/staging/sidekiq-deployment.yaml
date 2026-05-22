@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: atlaz-sidekiq
+  namespace: staging-1
+  labels:
+    app: atlaz
+    component: sidekiq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: atlaz
+      component: sidekiq
+  template:
+    metadata:
+      labels:
+        app: atlaz
+        component: sidekiq
+    spec:
+      imagePullSecrets:
+        - name: ghcr-credentials
+      containers:
+        - name: atlaz-sidekiq
+          image: ghcr.io/ronaq13/atlaz:IMAGE_TAG
+          command: ["bundle", "exec", "sidekiq", "-C", "config/sidekiq.yml"]
+          envFrom:
+            - configMapRef:
+                name: atlaz-config
+          # RAILS_MASTER_KEY is injected by Jenkins at deploy time via:
+          # kubectl set env deployment/atlaz-sidekiq RAILS_MASTER_KEY=<value>
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"

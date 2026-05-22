@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: atlaz-config
+  namespace: staging-1
+data:
+  RAILS_ENV: "staging1"
+  RAILS_LOG_LEVEL: "info"
+  RAILS_MAX_THREADS: "5"
+  # Redis running natively on the VM — replace HOST_NODE_IP with actual node IP
+  REDIS_URL: "redis://HOST_NODE_IP:6379/0"
+  TYPESENSE_HOST: "atlaz-typesense"
+  TYPESENSE_PORT: "8108"
+  TYPESENSE_PROTOCOL: "http"

@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: atlaz
+  namespace: staging-1
+  labels:
+    app: atlaz
+    component: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: atlaz
+      component: web
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: atlaz
+        component: web
+    spec:
+      imagePullSecrets:
+        - name: ghcr-credentials
+      containers:
+        - name: atlaz
+          image: ghcr.io/ronaq13/atlaz:IMAGE_TAG
+          command: ["bundle", "exec", "thrust", "bin/rails", "server", "-b", "0.0.0.0", "-p", "3013"]
+          ports:
+            - containerPort: 3013
+          envFrom:
+            - configMapRef:
+                name: atlaz-config
+          # RAILS_MASTER_KEY is injected by Jenkins at deploy time via:
+          # kubectl set env deployment/atlaz RAILS_MASTER_KEY=<value>
+          readinessProbe:
+            httpGet:
+              path: /up
+              port: 3013
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /up
+              port: 3013
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"

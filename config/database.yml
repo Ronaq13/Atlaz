@@ -86,6 +86,14 @@ test:
 # Read https://guides.rubyonrails.org/configuring.html#configuring-a-database
 # for a full overview on how database connection configuration can be specified.
 #
+staging1:
+  <<: *default
+  database: <%= Rails.application.credentials.dig(:db, :name) || "atlaz_staging1" %>
+  host:     <%= Rails.application.credentials.dig(:db, :host) %>
+  port:     <%= Rails.application.credentials.dig(:db, :port) || 5432 %>
+  username: <%= Rails.application.credentials.dig(:db, :username) %>
+  password: <%= Rails.application.credentials.dig(:db, :password) %>
+
 production:
   primary: &primary_production
     <<: *default
