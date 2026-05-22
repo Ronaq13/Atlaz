@@ -5,6 +5,7 @@ class HotelIndexSyncJob < ApplicationJob
 
   def perform
     Hotel.active
+         .with_rates
          .includes(:rates => :currency)
          .find_in_batches(batch_size: BATCH_SIZE) do |batch|
       documents = batch.map { |hotel| Search::HotelSearchDocument.from_hotel(hotel) }

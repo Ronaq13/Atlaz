@@ -40,6 +40,7 @@ class Hotel < ApplicationRecord
 
   # ─── Scopes ──────────────────────────────────────────────────
   scope :active,            -> { where(state: "active") }
+  scope :with_rates,        -> { where.associated(:rates) }
 
   # ─── Callbacks ───────────────────────────────────────────────
   before_validation :generate_slug, on: :create

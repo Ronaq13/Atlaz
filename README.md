@@ -1,8 +1,35 @@
 
-## Build docker image locally
+## Build docker image locally and push
 
 ```
-docker build -t atlaz:local .
+docker buildx build --platform linux/amd64 -t ghcr.io/ronaq13/atlaz:latest --push .
+
+export KUBECONFIG=~/.kube/staging1-config
+
+kubectl apply -k k8s/overlays/staging-1
+kubectl rollout restart deployment/atlaz -n staging-1
+kubectl rollout restart deployment/atlaz-sidekiq -n staging-1
+kubectl get pods -n staging-1 -w
+
+
+kubectl exec -it deploy/atlaz -n staging-1 -- bash
+```
+
+## External nginx path (gcp-staging-1-partners)
+
+Atlaz runs on k8s NodePort `30013`. Add the block from `deploy/nginx/gcp-staging-1-atlaz.conf`
+inside the existing HTTPS `server { ... }` for `gcp-staging-1-partners.thrillo.dev`, then reload nginx.
+
+```bash
+# on the staging VM — paste block into /etc/nginx/sites-enabled/staging-partners.conf
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+Verify:
+
+```bash
+curl -s https://gcp-staging-1-partners.thrillo.dev/atlaz/up
+curl -s "https://gcp-staging-1-partners.thrillo.dev/atlaz/api/v1/hotels/search?q=dubai&check_in=2026-08-15&sort_by=price_asc"
 ```
 
 ## Running image locally
